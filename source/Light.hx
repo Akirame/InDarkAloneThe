@@ -15,8 +15,8 @@ class Light extends FlxSprite
 { 
     private var darkness:FlxSprite;
     
-    public function new(x:Float, y:Float, darkness:FlxSprite):Void {
-		super(x, y, "assets/images/glow-light2.png");
+    public function new(x:Float, y:Float, darkness:FlxSprite):Void{
+		super(x, y, "assets/images/glow-light1.png");
 
 		this.darkness = darkness;
 		this.blend = BlendMode.SCREEN;

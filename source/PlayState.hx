@@ -5,6 +5,8 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.ogmo.FlxOgmoLoader;
+import flixel.addons.effects.FlxTrail;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.BlendMode;
@@ -14,22 +16,33 @@ class PlayState extends FlxState
 
 	private var tilemap:FlxTilemap;
 	private var loader:FlxOgmoLoader;
-	var p1:Player;
 	var background:FlxSprite;
 	var darkness:FlxSprite;
 	var light:Light;
 
+	private var trail:FlxTrail;
 	override public function create():Void
 	{
 		super.create();
+		Reg.tilesGroup = new FlxTypedGroup();
+		Reg.ladderGroup = new FlxTypedGroup();
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
-		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 16, 16, "tiles");
+		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 32, 32, "tiles");
 		tilemap.setTileProperties(0, FlxObject.NONE);
-		tilemap.setTileProperties(1, FlxObject.ANY);
-		tilemap.setTileProperties(2, FlxObject.NONE);
+		tilemap.setTileProperties(1, FlxObject.ANY);		
 		loader.loadEntities(placeEntities, "entities");
+		FlxG.worldBounds.set(tilemap.width, tilemap.height);
+		FlxG.camera.follow(Reg.p1);
+		
+		background = new FlxSprite();
+		background.makeGraphic(FlxG.width, FlxG.height);
+		add(background);
+		
+		
 		add(tilemap);
-		add(p1);
+		add(Reg.tilesGroup);
+		add(Reg.ladderGroup);
+		add(Reg.p1);
 
 		//
 
@@ -39,6 +52,7 @@ class PlayState extends FlxState
 		darkness.blend = BlendMode.MULTIPLY;
 
 		light = new Light(FlxG.width / 2, FlxG.height / 2, darkness);
+		light.scale.set(7,7);
 		add(light);
 		add(darkness);
 
@@ -47,8 +61,8 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		light.setPosition(p1.x-light.width, p1.y);
-		FlxG.collide(tilemap, p1);
+		light.setPosition(Reg.p1.x+Reg.p1.width/2, Reg.p1.y+Reg.p1.height/2);
+		FlxG.collide(tilemap, Reg.p1);
 	}
 
 	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
@@ -59,7 +73,10 @@ class PlayState extends FlxState
 		switch (entityName)
 		{
 			case "player":
-				p1 = new Player(x, y);
+				Reg.p1 = new Player(x, y);
+			case "ladder":
+				var e = new Tiles(x, y, null);
+				Reg.ladderGroup.add(e);
 		}
 	}
 
