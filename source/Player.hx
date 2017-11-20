@@ -23,11 +23,11 @@ class Player extends FlxSprite
 	{
 		super(X, Y);
 		makeGraphic(32, 32, 0xFFFF0000);
-		acceleration.y = 1500;
+		acceleration.y = Reg.gravity;
 		fsm = new FlxFSM<FlxSprite>(this);
 		fsm.transitions
 		.add(Idle, Jump, Conditions.jump)
-		.add(Idle, Fall, Conditions.fall)
+		.add(Idle, Fall, Conditions.fall)	
 		.add(Fall, Idle, Conditions.grounded)
 		.add(Fall,Sliding,Conditions.onWall)
 		.add(Jump, Idle, Conditions.grounded)		
@@ -67,10 +67,6 @@ class Conditions
 	{
 		return owner.isTouching(FlxObject.FLOOR);
 	}
-	public static function doubleJump(owner:FlxSprite):Bool
-	{
-		return (FlxG.keys.justPressed.Z && !owner.isTouching(FlxObject.FLOOR));
-	}
 	public static function onWall(owner:FlxSprite):Bool
 	{
 		return (owner.isTouching(FlxObject.WALL) && !owner.isTouching(FlxObject.FLOOR));
@@ -87,6 +83,10 @@ class Conditions
 	{
 		return(!owner.isTouching(FlxObject.FLOOR));
 	}
+	public static function platformFall(owner:FlxSprite):Bool
+	{
+		return(FlxG.collide(Reg.tilesGroup, owner));
+	}
 }
 
 class Idle extends FlxFSMState<FlxSprite>
@@ -100,7 +100,7 @@ class Idle extends FlxFSMState<FlxSprite>
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -300:300;
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;
 		}
 	}
 }
@@ -109,14 +109,14 @@ class Jump extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
-		owner.velocity.y -= 400;
+		owner.velocity.y -= 400;				
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -300:300;			
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
 		}
 	}
 }
@@ -132,7 +132,7 @@ class Fall extends FlxFSMState<FlxSprite>
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -300:300;			
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
 		}
 	}
 }
@@ -183,7 +183,7 @@ class WallJump extends FlxFSMState<FlxSprite>
 	{
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -300:300;			
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
 		}
 	}
 }
