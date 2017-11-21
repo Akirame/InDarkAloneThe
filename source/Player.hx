@@ -12,30 +12,28 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
  * ...
  * @author asd
  */
-class Player extends FlxSprite 
+class Player extends FlxSprite
 {
 	public var fsm:FlxFSM<FlxSprite>;
 	private var trail:FlxTrail;
 	private var gfx:FlxEmitter;	
+	private var light:Light;
 	static public var wallDirection:Int = 0;
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
-		makeGraphic(32, 32, 0xFFFF0000);
+		makeGraphic(32, 64, 0xFFFF0000);
 		acceleration.y = Reg.gravity;
+		light = new Light(x+width/2,y+height/2, Reg.darkness);
+		light.scale.set(7, 7);
+		
+		FlxG.state.add(light);
+		
 		fsm = new FlxFSM<FlxSprite>(this);
 		fsm.transitions
-		.add(Idle, Jump, Conditions.jump)
 		.add(Idle, Fall, Conditions.fall)	
 		.add(Fall, Idle, Conditions.grounded)
-		.add(Fall,Sliding,Conditions.onWall)
-		.add(Jump, Idle, Conditions.grounded)		
-		.add(Jump, Sliding, Conditions.onWall)	
-		.add(Sliding, WallJump, Conditions.onWallJump)		
-		.add(Sliding, Fall, Conditions.offWall)
-		.add(WallJump, Sliding, Conditions.onWall)
-		.add(WallJump,Idle,Conditions.grounded)
 		.start(Idle);
 		
 		gfx = new FlxEmitter();		
@@ -45,6 +43,7 @@ class Player extends FlxSprite
 	
 	override public function update(elapsed:Float):Void 
 	{
+		light.setPosition(x+width/2, y+height/2);
 		fsm.update(elapsed);
 		super.update(elapsed);
 	}
@@ -53,6 +52,22 @@ class Player extends FlxSprite
 		fsm.destroy();
 		fsm = null;
 		super.destroy();		
+	}
+	public function getJump():Void
+	{	
+		fsm.transitions
+		.add(Idle, Jump, Conditions.jump)
+		.add(Jump, Idle, Conditions.grounded);	
+	}
+	public function getWallJump():Void
+	{
+		fsm.transitions
+			.add(Fall,Sliding,Conditions.onWall)
+			.add(Jump, Sliding, Conditions.onWall)	
+			.add(Sliding, WallJump, Conditions.onWallJump)		
+			.add(Sliding, Fall, Conditions.offWall)
+			.add(WallJump, Sliding, Conditions.onWall)
+			.add(WallJump, Idle, Conditions.grounded);
 	}
 }
 
@@ -85,7 +100,7 @@ class Conditions
 	}
 	public static function platformFall(owner:FlxSprite):Bool
 	{
-		return(FlxG.collide(Reg.tilesGroup, owner));
+		return(FlxG.collide(Reg.tileGroup, owner));
 	}
 }
 
@@ -93,7 +108,7 @@ class Idle extends FlxFSMState<FlxSprite>
 {	
 	override public function enter(owner:FlxSprite,fsm:FlxFSM<FlxSprite>):Void
 	{
-		owner.makeGraphic(32, 32, 0xFFFF0000);
+		owner.makeGraphic(32, 64, 0xFFFF0000);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
@@ -121,12 +136,7 @@ class Jump extends FlxFSMState<FlxSprite>
 	}
 }
 class Fall extends FlxFSMState<FlxSprite>
-{
-	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
-	{		
-		
-	}
-	
+{	
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{			
 		owner.velocity.x = 0;
@@ -140,8 +150,7 @@ class Sliding extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
-		owner.makeGraphic(32, 32, 0xFF00FF00);
-	
+		owner.makeGraphic(32, 64, 0xFF00FF00);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{

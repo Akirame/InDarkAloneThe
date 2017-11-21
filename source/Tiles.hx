@@ -22,11 +22,6 @@ class Tiles extends FlxSprite
 		super(X, Y);		
 		tipo = type;
 		immovable = true;
-		switch(tipo)
-		{
-			case TipoTile.Ladder:
-				makeGraphic(32, 32, 0xFF0CFBDB);
-		}
 	}
 	override public function update(elapsed:Float):Void 
 	{

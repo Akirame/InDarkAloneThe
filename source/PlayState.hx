@@ -1,5 +1,6 @@
 package;
 
+import Tiles;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -12,9 +13,11 @@ import flixel.math.FlxRandom;
 import flixel.system.FlxSound;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.BlendMode;
 import openfl.display.Tile;
+import pickups.Upgrades;
 
 class PlayState extends FlxState
 {
@@ -22,8 +25,7 @@ class PlayState extends FlxState
 	private var tilemap:FlxTilemap;
 	private var loader:FlxOgmoLoader;
 	private var background:FlxSprite;
-	private var darkness:FlxSprite;
-	private var light:Light;
+	private var darkness:FlxSprite;	
 	private var randLightning:FlxRandom;
 	private var contaLightning:Float = 0;
 	private var lightning:FlxSprite;
@@ -35,7 +37,12 @@ class PlayState extends FlxState
 		super.create();
 		randLightning = new FlxRandom();
 		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);		
-		Reg.tilesGroup = new FlxTypedGroup();		
+		Reg.darkness = new FlxSprite(0,0);
+		Reg.darkness.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
+		Reg.darkness.scrollFactor.set(0, 0);
+		Reg.darkness.blend = BlendMode.MULTIPLY;
+		
+		Reg.tileGroup = new FlxTypedGroup();		
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 32, 32, "tiles");
 		tilemap.setTileProperties(0, FlxObject.NONE);
@@ -52,26 +59,20 @@ class PlayState extends FlxState
 		background.scrollFactor.x = 0.2;
 		
 		add(tilemap);
-		add(Reg.tilesGroup);		
-		add(Reg.p1);
+		add(Reg.tileGroup);				
+		add(Reg.p1); 
 		add(background);
 	
 		//
 
-		darkness = new FlxSprite(0,0);
-		darkness.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
-		darkness.scrollFactor.set(0, 0);
-		darkness.blend = BlendMode.MULTIPLY;
+		
 		lightning = new FlxSprite(0, 0);
 		lightning.makeGraphic(FlxG.width, FlxG.height, 0xFFFFFFFF);
 		lightning.scrollFactor.set(0, 0);
 		lightning.alpha = 0;
 		
-		light = new Light(Reg.p1.x+Reg.p1.width/2, Reg.p1.y+Reg.p1.height/2, darkness);
-		light.scale.set(7, 7);
-		
-		add(light);
-		add(darkness);
+	
+		add(Reg.darkness);
 		add(lightning);
 		
 		FlxG.sound.play(AssetPaths.rain2__wav, 0.2, true);
@@ -80,28 +81,21 @@ class PlayState extends FlxState
 			FlxG.sound.playMusic(AssetPaths.rain1__wav,1);	
 		}
 	}
+	
+	function Falloff(t:FlxObject, o:FlxObject):Void
+	{
+		if (FlxG.keys.justPressed.DOWN)
+		t.allowCollisions = FlxObject.NONE;
+		else if (o.y >= t.y)
+		t.allowCollisions = FlxObject.CEILING;
+	}
 
 	override public function update(elapsed:Float):Void
 	{
-		super.update(elapsed);		
-		light.setPosition(Reg.p1.x+Reg.p1.width/2, Reg.p1.y+Reg.p1.height/2);
-		FlxG.collide(tilemap, Reg.p1);		
-		FlxG.collide(Reg.tilesGroup, Reg.p1, tileEffect);		
+		super.update(elapsed);			
+		FlxG.collide(tilemap, Reg.p1);			
 		LightningOK();
-	}	
-	function tileEffect(t:Tiles,p:Player):Void
-	{		
-		
-		if (t.getTipo() == Tiles.TipoTile.Ladder && FlxG.keys.justPressed.DOWN)
-		{
-			t.solid = false;			
-		}
-	}
-	
-	function lightningEnd(tween:FlxTween):Void
-	{
-		FlxTween.tween(lightning, {alpha:0}, 0.2, {type:FlxTween.ONESHOT});
-	}
+	}		
 
 	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
 	{
@@ -112,10 +106,15 @@ class PlayState extends FlxState
 		{
 			case "player":
 				Reg.p1 = new Player(x, y);
-			case "ladder":
-				var e = new Tiles(x, y, Tiles.TipoTile.Ladder);
-				e.allowCollisions = FlxObject.UP;				
-				Reg.tilesGroup.add(e);
+			case "upgradeJump":
+				var e = new pickups.Upgrades(x, y, TypeUpgrade.JUMP);
+				add(e);
+			case "upgradeWallJump":
+				var e = new pickups.Upgrades(x, y, TypeUpgrade.WALLJUMP);		
+				add(e);
+			case "torch":
+				var e = new Torch(x, y,(Std.parseInt(entityData.get("direction"))));			
+				add(e);
 		}
 	}
 	
@@ -126,7 +125,8 @@ class PlayState extends FlxState
 			if (randLightning.bool(70))
 			{					
 				thunderSound.play();
-				FlxTween.tween(lightning, {alpha:1}, 0.2, {type:FlxTween.ONESHOT, onComplete:lightningEnd});			
+				camera.flash(FlxColor.WHITE, 1.5);		
+				FlxG.camera.shake(0.025, 1);	
 			}
 			contaLightning = 0;
 		}
@@ -136,7 +136,7 @@ class PlayState extends FlxState
 
 	override public function draw():Void
 	{
-		FlxSpriteUtil.fill(darkness,0xff000000);
+		FlxSpriteUtil.fill(Reg.darkness,0xff000000);
 		super.draw();
 	}
 }
