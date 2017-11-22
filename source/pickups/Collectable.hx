@@ -24,6 +24,7 @@ class Collectable extends FlxSprite
 	
 	public function pickup(c:Collectable,p:Player):Void
 	{
-		c.destroy();
+		Reg.spritesGroup.remove(c);
 	}
+
 }

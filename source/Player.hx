@@ -31,7 +31,7 @@ class Player extends FlxSprite
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
-		makeGraphic(32, 64, 0xFFFF0000);
+		makeGraphic(32, 32, 0xFFFF0000);
 		acceleration.y = Reg.gravity;		
 		light = new Light(x+width/2,y+height/5, Reg.darkness);
 		light.scale.set(Reg.luminity, Reg.luminity);
@@ -99,6 +99,10 @@ class Player extends FlxSprite
 	{
 		Reg.luminityDown -= 0.1;
 	}
+	public function percentLight():Float
+	{
+		return (lightCountDown);
+	}
 }
 
 class Conditions
@@ -138,7 +142,7 @@ class Idle extends FlxFSMState<FlxSprite>
 {	
 	override public function enter(owner:FlxSprite,fsm:FlxFSM<FlxSprite>):Void
 	{
-		owner.makeGraphic(32, 64, 0xFFFF0000);
+		owner.makeGraphic(32, 32, 0xFFFF0000);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
@@ -180,7 +184,7 @@ class Sliding extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
-		owner.makeGraphic(32, 64, 0xFF00FF00);
+		owner.makeGraphic(32, 32, 0xFF00FF00);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{

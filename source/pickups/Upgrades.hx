@@ -38,7 +38,6 @@ class Upgrades extends pickups.Collectable
 		particles.launchAngle.set(-180, 180);
 		particles.velocity.set( -100, -100, 100, 100);
 		particles.lifespan.set(0.1, 1.5);
-
 		
 		switch (tipo) 
 		{
@@ -48,9 +47,8 @@ class Upgrades extends pickups.Collectable
 				loadGraphic(AssetPaths.upgradeWallJump__png, false, 32, 32);
 			case TypeUpgrade.LIGHT:
 				loadGraphic(AssetPaths.upgradeLight__png, false, 32, 32);
-				
 		}
-		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG, ease:FlxEase.smoothStepInOut });
+		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG});
 		FlxG.state.add(textito);
 		FlxG.state.add(particles);
 		particles.start(false, 0.05);
@@ -85,5 +83,15 @@ class Upgrades extends pickups.Collectable
 				particles.destroy();
 				FlxG.sound.play(AssetPaths.pickupUpgrade__wav, 0.70);
 		}
+	}
+	override public function kill():Void 
+	{
+		super.kill();
+		particles.kill();
+	}
+	override public function revive():Void 
+	{
+		super.revive();
+		particles.start(false, 0.05);
 	}
 }

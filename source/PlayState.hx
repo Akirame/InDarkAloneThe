@@ -1,6 +1,8 @@
 package;
 
 import Tiles;
+import flixel.text.FlxText;
+import flixel.ui.FlxBar;
 import ilumination.Light;
 import ilumination.LightAreaUp;
 import ilumination.Torch;
@@ -34,26 +36,40 @@ class PlayState extends FlxState
 	private var lightning:FlxSprite;
 	private var thunderSound:FlxSound;		
 	private var trail:FlxTrail;
+	private var _barLight:FlxBar;
+	private var battery:FlxSprite;
 	
 	override public function create():Void
 	{
 		super.create();
+		
+		
+		
 		randLightning = new FlxRandom();
 		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);		
 		Reg.darkness = new FlxSprite(0,0);
 		Reg.darkness.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
 		Reg.darkness.scrollFactor.set(0, 0);
 		Reg.darkness.blend = BlendMode.MULTIPLY;
+		Reg.spritesGroup = new FlxTypedGroup();
 		
 		Reg.tileGroup = new FlxTypedGroup();		
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 32, 32, "tiles");
 		tilemap.setTileProperties(0, FlxObject.NONE);
-		tilemap.setTileProperties(1, FlxObject.ANY);		
+		tilemap.setTileProperties(1, FlxObject.ANY);
+		tilemap.setTileProperties(2, FlxObject.ANY, Falloff);
 		loader.loadEntities(placeEntities, "entities");
 		FlxG.worldBounds.set(tilemap.width, tilemap.height);
 		FlxG.camera.follow(Reg.p1);
 		Reg.tilemapActual = tilemap;
+		
+		battery = new FlxSprite(19, FlxG.height - 50, AssetPaths.battery__png);
+		battery.scrollFactor.set(0, 0);
+		_barLight = new FlxBar(20, FlxG.height - 50, LEFT_TO_RIGHT, 99, 20, Reg.p1, "lightCountDown", 35, 100);
+		_barLight.createFilledBar(FlxColor.BLACK, FlxColor.WHITE, false, FlxColor.WHITE);
+		_barLight.numDivisions = 100;
+		_barLight.scrollFactor.set(0, 0);
 		
 		background = new FlxSprite();
 		background.loadGraphic(AssetPaths.rainBackground__png, true, 960, 720);
@@ -63,8 +79,10 @@ class PlayState extends FlxState
 		
 		add(tilemap);
 		add(Reg.tileGroup);				
+		add(Reg.spritesGroup);
 		add(Reg.p1); 
-		add(background);
+		
+		
 	
 		//
 
@@ -95,6 +113,7 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		respawnEntities();
 		super.update(elapsed);			
 		FlxG.collide(tilemap, Reg.p1);			
 		LightningOK();
@@ -111,19 +130,24 @@ class PlayState extends FlxState
 				Reg.p1 = new Player(x, y);
 			case "upgradeJump":
 				var e = new pickups.Upgrades(x, y, TypeUpgrade.JUMP);
-				add(e);
+				Reg.spritesGroup.add(e);
+				e.kill();
 			case "upgradeWallJump":
 				var e = new pickups.Upgrades(x, y, TypeUpgrade.WALLJUMP);		
-				add(e);
+				Reg.spritesGroup.add(e);
+				e.kill();
 			case "torch":
 				var e = new ilumination.Torch(x, y,(Std.parseInt(entityData.get("direction"))));			
-				add(e);
+				Reg.spritesGroup.add(e);
+				e.kill();
 			case "lightUp":
 				var e = new ilumination.LightAreaUp(x, y);
-				add(e);
+				Reg.spritesGroup.add(e);
+				e.kill();
 			case "torchUp":
 				var e = new Upgrades(x, y, TypeUpgrade.LIGHT);
-				add(e);
+				Reg.spritesGroup.add(e);
+				e.kill();
 		}
 	}
 	
@@ -143,9 +167,22 @@ class PlayState extends FlxState
 			contaLightning += FlxG.elapsed;
 	}
 
+	public function respawnEntities():Void
+	{
+		for (entities in Reg.spritesGroup)
+		{
+			if (entities.isOnScreen() && !entities.alive)
+				entities.revive();
+			else if (!entities.isOnScreen() && entities.alive)
+				entities.kill();
+		}
+	}
+	
 	override public function draw():Void
 	{
-		FlxSpriteUtil.fill(Reg.darkness,0xff000000);
+		FlxSpriteUtil.fill(Reg.darkness, 0xff000000);		
+		add(_barLight);
+		add(battery);
 		super.draw();
 	}
 }

@@ -33,6 +33,4 @@ class Torch extends FlxSprite
 		else if (dir == -1)
 		facing = FlxObject.LEFT;
 	}
-	
-	
 }
