@@ -1,6 +1,9 @@
 package;
 
 import Tiles;
+import ilumination.Light;
+import ilumination.LightAreaUp;
+import ilumination.Torch;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -113,7 +116,13 @@ class PlayState extends FlxState
 				var e = new pickups.Upgrades(x, y, TypeUpgrade.WALLJUMP);		
 				add(e);
 			case "torch":
-				var e = new Torch(x, y,(Std.parseInt(entityData.get("direction"))));			
+				var e = new ilumination.Torch(x, y,(Std.parseInt(entityData.get("direction"))));			
+				add(e);
+			case "lightUp":
+				var e = new ilumination.LightAreaUp(x, y);
+				add(e);
+			case "torchUp":
+				var e = new Upgrades(x, y, TypeUpgrade.LIGHT);
 				add(e);
 		}
 	}

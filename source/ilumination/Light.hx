@@ -1,4 +1,4 @@
-package ;
+package ilumination ;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;

@@ -16,6 +16,7 @@ enum TypeUpgrade
 {
 	JUMP;
 	WALLJUMP;
+	LIGHT;
 }
 class Upgrades extends pickups.Collectable 
 {
@@ -45,6 +46,9 @@ class Upgrades extends pickups.Collectable
 				loadGraphic(AssetPaths.upgradeJump__png, false, 32, 32);
 			case TypeUpgrade.WALLJUMP:
 				loadGraphic(AssetPaths.upgradeWallJump__png, false, 32, 32);
+			case TypeUpgrade.LIGHT:
+				loadGraphic(AssetPaths.upgradeLight__png, false, 32, 32);
+				
 		}
 		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG, ease:FlxEase.smoothStepInOut });
 		FlxG.state.add(textito);
@@ -72,6 +76,12 @@ class Upgrades extends pickups.Collectable
 				Reg.p1.getWallJump();
 				textito.resetText("WallJump!");
 				textito.start(0.02, false, true, null);				
+				particles.destroy();
+				FlxG.sound.play(AssetPaths.pickupUpgrade__wav, 0.70);
+			case TypeUpgrade.LIGHT:
+				Reg.p1.lightPlusPlus();
+				textito.resetText("Light last longer");
+				textito.start(0.02, false, true, null);
 				particles.destroy();
 				FlxG.sound.play(AssetPaths.pickupUpgrade__wav, 0.70);
 		}

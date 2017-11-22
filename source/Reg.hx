@@ -19,4 +19,6 @@ class Reg
 	static public var tilemapActual:FlxTilemap;
 	static public var collectableGroup:FlxTypedGroup<Collectable>;
 	static public var darkness:FlxSprite;
+	static public var luminity:Float = 10;
+	static public var luminityDown:Float = 0.8;
 }

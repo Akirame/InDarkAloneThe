@@ -1,5 +1,7 @@
 package;
 
+import ilumination.Light;
+import ilumination.LightAreaUp;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -7,6 +9,9 @@ import flixel.addons.effects.FlxTrail;
 import flixel.addons.util.FlxFSM;
 import flixel.effects.particles.FlxEmitter;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.text.FlxText;
+import flixel.ui.FlxBar;
+import openfl.display.BlendMode;
 
 /**
  * ...
@@ -17,17 +22,19 @@ class Player extends FlxSprite
 	public var fsm:FlxFSM<FlxSprite>;
 	private var trail:FlxTrail;
 	private var gfx:FlxEmitter;	
-	private var light:Light;
+	private var light:ilumination.Light;
+	private var lightCountDown:Float = 100;
+	
 	static public var wallDirection:Int = 0;
+	
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
 		makeGraphic(32, 64, 0xFFFF0000);
-		acceleration.y = Reg.gravity;
-		light = new Light(x+width/2,y+height/2, Reg.darkness);
-		light.scale.set(7, 7);
-		
+		acceleration.y = Reg.gravity;		
+		light = new Light(x+width/2,y+height/5, Reg.darkness);
+		light.scale.set(Reg.luminity, Reg.luminity);
 		FlxG.state.add(light);
 		
 		fsm = new FlxFSM<FlxSprite>(this);
@@ -38,14 +45,15 @@ class Player extends FlxSprite
 		
 		gfx = new FlxEmitter();		
 		trail = new FlxTrail(this, null, 10, 3, 0.4);
-		FlxG.state.add(trail);
+		
 	}
 	
 	override public function update(elapsed:Float):Void 
 	{
-		light.setPosition(x+width/2, y+height/2);
 		fsm.update(elapsed);
 		super.update(elapsed);
+		lightOff();
+		trace(lightCountDown);
 	}
 	override public function destroy():Void 
 	{
@@ -68,6 +76,28 @@ class Player extends FlxSprite
 			.add(Sliding, Fall, Conditions.offWall)
 			.add(WallJump, Sliding, Conditions.onWall)
 			.add(WallJump, Idle, Conditions.grounded);
+	}
+	
+	public function lightOff():Void 
+	{
+		light.scale.set(lightCountDown*Reg.luminity/100,lightCountDown*Reg.luminity/100);
+		light.setPosition(x + width / 2, y + height / 5 );
+		if(lightCountDown > 35)
+		lightCountDown -= FlxG.elapsed * Reg.luminityDown;
+		else
+			lightCountDown = 35;
+	}
+	
+	public function lightRenew(l:ilumination.LightAreaUp,p:Player):Void
+	{
+		if(lightCountDown<100)
+		lightCountDown += FlxG.elapsed*20;
+		else
+		lightCountDown = 100;
+	}
+	public function lightPlusPlus():Void
+	{
+		Reg.luminityDown -= 0.1;
 	}
 }
 

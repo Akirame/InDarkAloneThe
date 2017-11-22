@@ -30,5 +30,8 @@
     <torch id="7" x="992" y="320" direction="1" />
     <torch id="1" x="800" y="320" direction="-1" />
     <torch id="4" x="32" y="128" direction="1" />
+    <lightUp id="2" x="256" y="192" />
+    <torchUp id="8" x="480" y="256" />
+    <torchUp id="9" x="512" y="256" />
   </entities>
 </level>
