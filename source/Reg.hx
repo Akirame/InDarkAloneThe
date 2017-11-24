@@ -22,4 +22,5 @@ class Reg
 	static public var darkness:FlxSprite;
 	static public var luminity:Float = 10;
 	static public var luminityDown:Float = 0.8;
+	static public var lightCountDown:Float = 100;
 }

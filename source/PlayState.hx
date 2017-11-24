@@ -1,6 +1,7 @@
 package;
 
 import Tiles;
+import flixel.addons.text.FlxTypeText;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import ilumination.Light;
@@ -22,6 +23,8 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 import openfl.display.BlendMode;
 import openfl.display.Tile;
+import pickups.Key;
+import pickups.SignsText;
 import pickups.Upgrades;
 
 class PlayState extends FlxState
@@ -30,30 +33,32 @@ class PlayState extends FlxState
 	private var tilemap:FlxTilemap;
 	private var loader:FlxOgmoLoader;
 	private var background:FlxSprite;
-	private var darkness:FlxSprite;	
+	private var darkness:FlxSprite;
 	private var randLightning:FlxRandom;
 	private var contaLightning:Float = 0;
 	private var lightning:FlxSprite;
-	private var thunderSound:FlxSound;		
+	private var thunderSound:FlxSound;
 	private var trail:FlxTrail;
 	private var _barLight:FlxBar;
 	private var battery:FlxSprite;
-	
+	private var contaEnd:Float = 10;
+	private var textEnd:FlxTypeText;
+	private var contaTextEnd:Float = 1;
+	private var textEndCount:Int = 9;
+
 	override public function create():Void
 	{
 		super.create();
-		
-		
-		
+
 		randLightning = new FlxRandom();
-		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);		
+		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);
 		Reg.darkness = new FlxSprite(0,0);
 		Reg.darkness.makeGraphic(FlxG.width, FlxG.height, 0xff000000);
 		Reg.darkness.scrollFactor.set(0, 0);
 		Reg.darkness.blend = BlendMode.MULTIPLY;
 		Reg.spritesGroup = new FlxTypedGroup();
-		
-		Reg.tileGroup = new FlxTypedGroup();		
+
+		Reg.tileGroup = new FlxTypedGroup();
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 32, 32, "tiles");
 		tilemap.setTileProperties(0, FlxObject.NONE);
@@ -63,61 +68,68 @@ class PlayState extends FlxState
 		FlxG.worldBounds.set(tilemap.width, tilemap.height);
 		FlxG.camera.follow(Reg.p1);
 		Reg.tilemapActual = tilemap;
-		
+
 		battery = new FlxSprite(19, FlxG.height - 50, AssetPaths.battery__png);
 		battery.scrollFactor.set(0, 0);
-		_barLight = new FlxBar(20, FlxG.height - 50, LEFT_TO_RIGHT, 99, 20, Reg.p1, "lightCountDown", 35, 100);
+		_barLight = new FlxBar(23, FlxG.height - 50, LEFT_TO_RIGHT, 95, 20, Reg, "lightCountDown", 35, 100);
 		_barLight.createFilledBar(FlxColor.BLACK, FlxColor.WHITE, false, FlxColor.WHITE);
 		_barLight.numDivisions = 100;
 		_barLight.scrollFactor.set(0, 0);
-		
+
+		textEnd = new FlxTypeText(Reg.p1.x - 20, Reg.p1.y - 30, 250, "nada", 16);
+		textEnd.delay = 0.1;
+		textEnd.color = 0xFFFFFFFF;
+		textEnd.autoErase = true;
+		textEnd.waitTime = 5;
+
 		background = new FlxSprite();
 		background.loadGraphic(AssetPaths.rainBackground__png, true, 960, 720);
 		background.animation.add("active", [0, 1], 8, true);
 		background.animation.play("active");
 		background.scrollFactor.x = 0.2;
-		
-		add(tilemap);
-		add(Reg.tileGroup);				
-		add(Reg.spritesGroup);
-		add(Reg.p1); 
-		
-		
-	
-		//
 
-		
+		add(tilemap);
+		add(Reg.tileGroup);
+		add(Reg.spritesGroup);
+		add(Reg.p1);
+		add(textEnd);
+
 		lightning = new FlxSprite(0, 0);
 		lightning.makeGraphic(FlxG.width, FlxG.height, 0xFFFFFFFF);
 		lightning.scrollFactor.set(0, 0);
 		lightning.alpha = 0;
-		
-	
+
 		add(Reg.darkness);
 		add(lightning);
-		
+
 		FlxG.sound.play(AssetPaths.rain2__wav, 0.2, true);
 		if (FlxG.sound.music == null)
 		{
-			FlxG.sound.playMusic(AssetPaths.rain1__wav,1);	
+			FlxG.sound.playMusic(AssetPaths.rain1__wav,1);
 		}
 	}
-	
+
 	function Falloff(t:FlxObject, o:FlxObject):Void
 	{
 		if (FlxG.keys.justPressed.DOWN)
-		t.allowCollisions = FlxObject.NONE;
+			t.allowCollisions = FlxObject.NONE;
 		else if (o.y >= t.y)
-		t.allowCollisions = FlxObject.CEILING;
+			t.allowCollisions = FlxObject.CEILING;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		respawnEntities();
-		super.update(elapsed);			
-		FlxG.collide(tilemap, Reg.p1);			
+		super.update(elapsed);
+		FlxG.collide(tilemap, Reg.p1);
 		LightningOK();
-	}		
+		lightOff();
+		if (FlxG.keys.justPressed.C)
+		{
+			textEnd.resetText("9..");
+			textEnd.start(0.2, false, true,null);
+		}
+	}
 
 	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
 	{
@@ -133,14 +145,14 @@ class PlayState extends FlxState
 				Reg.spritesGroup.add(e);
 				e.kill();
 			case "upgradeWallJump":
-				var e = new pickups.Upgrades(x, y, TypeUpgrade.WALLJUMP);		
+				var e = new pickups.Upgrades(x, y, TypeUpgrade.WALLJUMP);
 				Reg.spritesGroup.add(e);
 				e.kill();
 			case "torch":
-				var e = new ilumination.Torch(x, y,(Std.parseInt(entityData.get("direction"))));			
+				var e = new ilumination.Torch(x, y,(Std.parseInt(entityData.get("direction"))));
 				Reg.spritesGroup.add(e);
 				e.kill();
-			case "lightUp":
+			case "lantern":
 				var e = new ilumination.LightAreaUp(x, y);
 				Reg.spritesGroup.add(e);
 				e.kill();
@@ -148,18 +160,29 @@ class PlayState extends FlxState
 				var e = new Upgrades(x, y, TypeUpgrade.LIGHT);
 				Reg.spritesGroup.add(e);
 				e.kill();
+			case "key":
+				var e = new Key(x, y);
+				Reg.spritesGroup.add(e);
+				e.kill();
+			case "door":
+				var e = new Door(x, y);
+				add(e);
+			case "textitos":
+				var e = new SignsText(x, y, (entityData.get("typeText")));
+				Reg.spritesGroup.add(e);
+				e.kill();
 		}
 	}
-	
-	function LightningOK():Void 
+
+	function LightningOK():Void
 	{
 		if (contaLightning > 30)
 		{
 			if (randLightning.bool(70))
-			{					
+			{
 				thunderSound.play();
-				camera.flash(FlxColor.WHITE, 1.5);		
-				FlxG.camera.shake(0.025, 1);	
+				camera.flash(FlxColor.WHITE, 1.5);
+				FlxG.camera.shake(0.025, 1);
 			}
 			contaLightning = 0;
 		}
@@ -177,12 +200,47 @@ class PlayState extends FlxState
 				entities.kill();
 		}
 	}
-	
+
 	override public function draw():Void
 	{
-		FlxSpriteUtil.fill(Reg.darkness, 0xff000000);		
+		FlxSpriteUtil.fill(Reg.darkness, 0xff000000);
 		add(_barLight);
 		add(battery);
 		super.draw();
+	}
+	public function lightOff():Void
+	{
+		if (Reg.lightCountDown == 35)
+		{
+			if (contaEnd >= 0)
+			{
+				if (contaTextEnd < 0)
+				{
+					textEnd.resetText(textEndCount + "..");
+					textEnd.setPosition(Reg.p1.x, Reg.p1.y - 20);
+					textEnd.start(0.2, false, true, null, endCountPlusPlus);
+					contaTextEnd = 1;
+				}
+				else
+				{
+					contaTextEnd -= FlxG.elapsed * 0.5;
+				}
+			}
+			else
+			{
+			FlxG.camera.fill(FlxColor.RED, true, 1.0);
+			}
+			contaEnd -= FlxG.elapsed * 0.5;
+			}
+		else
+		{
+			contaEnd = 10;
+			textEndCount = 9;
+		}
+	}
+
+	function endCountPlusPlus()
+	{
+		textEndCount--;
 	}
 }

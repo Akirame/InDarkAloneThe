@@ -16,7 +16,7 @@
     <Width>5218</Width>
     <Height>5128</Height>
   </LevelMaximumSize>
-  <Filename>C:\Users\18\Documents\InDarkAloneThe\assets\data\tilemap.oep</Filename>
+  <Filename>C:\Users\51\Documents\InDarkAloneThe\assets\data\tilemap.oep</Filename>
   <AngleMode>Radians</AngleMode>
   <CameraEnabled>false</CameraEnabled>
   <CameraSize>
@@ -103,7 +103,7 @@
         <X>0</X>
         <Y>0</Y>
       </Origin>
-      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+      <ImageDefinition DrawMode="Image" ImagePath="..\images\upgradeJump.png" Tiled="false">
         <RectColor A="255" R="0" G="0" B="0" />
       </ImageDefinition>
       <ValueDefinitions />
@@ -118,7 +118,7 @@
         <X>0</X>
         <Y>0</Y>
       </Origin>
-      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+      <ImageDefinition DrawMode="Image" ImagePath="..\images\upgradeWallJump.png" Tiled="false">
         <RectColor A="255" R="0" G="0" B="0" />
       </ImageDefinition>
       <ValueDefinitions />
@@ -133,7 +133,7 @@
         <X>0</X>
         <Y>0</Y>
       </Origin>
-      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+      <ImageDefinition DrawMode="Rectangle" ImagePath="..\images\torchTile.png" Tiled="true">
         <RectColor A="255" R="255" G="128" B="0" />
       </ImageDefinition>
       <ValueDefinitions>
@@ -141,7 +141,7 @@
       </ValueDefinitions>
       <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
     </EntityDefinition>
-    <EntityDefinition Name="lightUp" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
+    <EntityDefinition Name="lantern" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
       <Size>
         <Width>64</Width>
         <Height>128</Height>
@@ -150,7 +150,7 @@
         <X>0</X>
         <Y>0</Y>
       </Origin>
-      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+      <ImageDefinition DrawMode="Rectangle" ImagePath="..\images\lantern.png" Tiled="false">
         <RectColor A="255" R="255" G="255" B="255" />
       </ImageDefinition>
       <ValueDefinitions />
@@ -165,10 +165,57 @@
         <X>0</X>
         <Y>0</Y>
       </Origin>
-      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+      <ImageDefinition DrawMode="Image" ImagePath="..\images\upgradeLight.png" Tiled="false">
         <RectColor A="255" R="0" G="255" B="0" />
       </ImageDefinition>
       <ValueDefinitions />
+      <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
+    </EntityDefinition>
+    <EntityDefinition Name="key" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
+      <Size>
+        <Width>32</Width>
+        <Height>32</Height>
+      </Size>
+      <Origin>
+        <X>0</X>
+        <Y>0</Y>
+      </Origin>
+      <ImageDefinition DrawMode="Image" ImagePath="..\images\key.png" Tiled="false">
+        <RectColor A="255" R="255" G="0" B="0" />
+      </ImageDefinition>
+      <ValueDefinitions />
+      <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
+    </EntityDefinition>
+    <EntityDefinition Name="door" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
+      <Size>
+        <Width>32</Width>
+        <Height>96</Height>
+      </Size>
+      <Origin>
+        <X>0</X>
+        <Y>0</Y>
+      </Origin>
+      <ImageDefinition DrawMode="Image" ImagePath="..\images\door.png" Tiled="false">
+        <RectColor A="255" R="255" G="0" B="0" />
+      </ImageDefinition>
+      <ValueDefinitions />
+      <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
+    </EntityDefinition>
+    <EntityDefinition Name="textitos" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
+      <Size>
+        <Width>32</Width>
+        <Height>32</Height>
+      </Size>
+      <Origin>
+        <X>0</X>
+        <Y>0</Y>
+      </Origin>
+      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+        <RectColor A="255" R="128" G="128" B="64" />
+      </ImageDefinition>
+      <ValueDefinitions>
+        <ValueDefinition xsi:type="StringValueDefinition" Name="typeText" Default="" MaxChars="-1" MultiLine="false" />
+      </ValueDefinitions>
       <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
     </EntityDefinition>
   </EntityDefinitions>

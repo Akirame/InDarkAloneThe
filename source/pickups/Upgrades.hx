@@ -48,7 +48,7 @@ class Upgrades extends pickups.Collectable
 			case TypeUpgrade.LIGHT:
 				loadGraphic(AssetPaths.upgradeLight__png, false, 32, 32);
 		}
-		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG});
+		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG,ease:FlxEase.smoothStepInOut});
 		FlxG.state.add(textito);
 		FlxG.state.add(particles);
 		particles.start(false, 0.05);

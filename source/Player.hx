@@ -23,15 +23,14 @@ class Player extends FlxSprite
 	private var trail:FlxTrail;
 	private var gfx:FlxEmitter;	
 	private var light:ilumination.Light;
-	private var lightCountDown:Float = 100;
-	
+	private var key:Bool = false;
 	static public var wallDirection:Int = 0;
 	
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
-		makeGraphic(32, 32, 0xFFFF0000);
+		makeGraphic(32, 64, 0xFFFF0000);
 		acceleration.y = Reg.gravity;		
 		light = new Light(x+width/2,y+height/5, Reg.darkness);
 		light.scale.set(Reg.luminity, Reg.luminity);
@@ -53,7 +52,7 @@ class Player extends FlxSprite
 		fsm.update(elapsed);
 		super.update(elapsed);
 		lightOff();
-		trace(lightCountDown);
+		
 	}
 	override public function destroy():Void 
 	{
@@ -80,20 +79,20 @@ class Player extends FlxSprite
 	
 	public function lightOff():Void 
 	{
-		light.scale.set(lightCountDown*Reg.luminity/100,lightCountDown*Reg.luminity/100);
+		light.scale.set(Reg.lightCountDown*Reg.luminity/100,Reg.lightCountDown*Reg.luminity/100);
 		light.setPosition(x + width / 2, y + height / 5 );
-		if(lightCountDown > 35)
-		lightCountDown -= FlxG.elapsed * Reg.luminityDown;
+		if(Reg.lightCountDown > 35)
+		Reg.lightCountDown -= FlxG.elapsed * Reg.luminityDown;
 		else
-			lightCountDown = 35;
+			Reg.lightCountDown = 35;
 	}
 	
 	public function lightRenew(l:ilumination.LightAreaUp,p:Player):Void
 	{
-		if(lightCountDown<100)
-		lightCountDown += FlxG.elapsed*20;
+		if(Reg.lightCountDown<100)
+		Reg.lightCountDown += FlxG.elapsed*20;
 		else
-		lightCountDown = 100;
+		Reg.lightCountDown = 100;
 	}
 	public function lightPlusPlus():Void
 	{
@@ -101,7 +100,19 @@ class Player extends FlxSprite
 	}
 	public function percentLight():Float
 	{
-		return (lightCountDown);
+		return (Reg.lightCountDown);
+	}
+	public function doorKey():Void
+	{
+		if (key == false)
+		key = true;
+		else
+		key = false;
+		trace(key);
+	}
+	public function getKey():Bool
+	{
+		return key;
 	}
 }
 
@@ -122,7 +133,7 @@ class Conditions
 	}
 	public static function onWallJump(owner:FlxSprite):Bool
 	{
-		return (!owner.isTouching(FlxObject.FLOOR) && FlxG.keys.justPressed.Z);
+		return (!owner.isTouching(FlxObject.FLOOR) && FlxG.keys.justPressed.Z && ((Player.wallDirection == 1 && !FlxG.keys.pressed.RIGHT) || (Player.wallDirection == -1 && !FlxG.keys.pressed.LEFT))) ;
 	}
 	public static function offWall(owner:FlxSprite):Bool
 	{
@@ -142,7 +153,7 @@ class Idle extends FlxFSMState<FlxSprite>
 {	
 	override public function enter(owner:FlxSprite,fsm:FlxFSM<FlxSprite>):Void
 	{
-		owner.makeGraphic(32, 32, 0xFFFF0000);
+		owner.makeGraphic(32, 64, 0xFFFF0000);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
@@ -184,7 +195,7 @@ class Sliding extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
-		owner.makeGraphic(32, 32, 0xFF00FF00);
+		owner.makeGraphic(32, 64, 0xFF00FF00);
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
