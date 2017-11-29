@@ -76,5 +76,6 @@
     <textitos id="9" x="1920" y="320" typeText="DOOR" />
     <textitos id="10" x="2048" y="320" typeText="LANTERN" />
     <textitos id="11" x="2144" y="320" typeText="TUTORIAL" />
+    <enemy id="12" x="1344" y="448" />
   </entities>
 </level>

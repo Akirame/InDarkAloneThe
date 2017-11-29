@@ -1,4 +1,4 @@
-package;
+package states;
 
 import Tiles;
 import flixel.addons.text.FlxTypeText;
@@ -42,14 +42,19 @@ class PlayState extends FlxState
 	private var _barLight:FlxBar;
 	private var battery:FlxSprite;
 	private var contaEnd:Float = 10;
-	private var textEnd:FlxTypeText;
-	private var contaTextEnd:Float = 1;
-	private var textEndCount:Int = 9;
+	private var textEndCount:FlxTypeText;
+	private var countdownOneSec:Float = 1;
+	private var countdownNineSec:Int = 9;
+	private var textGameOver:FlxText;
+	private var noLightBool:Bool = false;
+	var _gameOver:Bool = false;
 
 	override public function create():Void
 	{
 		super.create();
 
+		textGameOver = new FlxText(FlxG.width / 2, FlxG.height / 2, 200, "Game Over/n Press R to restart");
+		
 		randLightning = new FlxRandom();
 		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);
 		Reg.darkness = new FlxSprite(0,0);
@@ -57,6 +62,7 @@ class PlayState extends FlxState
 		Reg.darkness.scrollFactor.set(0, 0);
 		Reg.darkness.blend = BlendMode.MULTIPLY;
 		Reg.spritesGroup = new FlxTypedGroup();
+		Reg.lightCountDown = 100;
 
 		Reg.tileGroup = new FlxTypedGroup();
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
@@ -76,29 +82,29 @@ class PlayState extends FlxState
 		_barLight.numDivisions = 100;
 		_barLight.scrollFactor.set(0, 0);
 
-		textEnd = new FlxTypeText(Reg.p1.x - 20, Reg.p1.y - 30, 250, "nada", 16);
-		textEnd.delay = 0.1;
-		textEnd.color = 0xFFFFFFFF;
-		textEnd.autoErase = true;
-		textEnd.waitTime = 5;
+		textEndCount = new FlxTypeText(Reg.p1.x - 20, Reg.p1.y - 30, 250, "nada", 16);
+		textEndCount.delay = 0.1;
+		textEndCount.color = 0xFFFFFFFF;
+		textEndCount.autoErase = true;
+		textEndCount.waitTime = 5;
 
 		background = new FlxSprite();
 		background.loadGraphic(AssetPaths.rainBackground__png, true, 960, 720);
 		background.animation.add("active", [0, 1], 8, true);
 		background.animation.play("active");
-		background.scrollFactor.x = 0.2;
+		background.scrollFactor.set(0, 0);
 
 		add(tilemap);
 		add(Reg.tileGroup);
 		add(Reg.spritesGroup);
 		add(Reg.p1);
-		add(textEnd);
+		add(textEndCount);
 
 		lightning = new FlxSprite(0, 0);
 		lightning.makeGraphic(FlxG.width, FlxG.height, 0xFFFFFFFF);
 		lightning.scrollFactor.set(0, 0);
 		lightning.alpha = 0;
-
+		add(background);
 		add(Reg.darkness);
 		add(lightning);
 
@@ -122,13 +128,27 @@ class PlayState extends FlxState
 		respawnEntities();
 		super.update(elapsed);
 		FlxG.collide(tilemap, Reg.p1);
-		LightningOK();
-		lightOff();
-		if (FlxG.keys.justPressed.C)
+	
+		if (_gameOver)
 		{
-			textEnd.resetText("9..");
-			textEnd.start(0.2, false, true,null);
+			if (countdownOneSec < 0)
+			{
+				FlxG.switchState(new SplashScreen());			
+			}
+			else
+			countdownOneSec -= FlxG.elapsed * 0.5;			
 		}
+		else
+		{
+			LightningOK();
+			lightOff();
+		}
+	}
+	
+	function endScreen():Void
+	{		
+		FlxG.sound.pause();
+		FlxG.sound.play(AssetPaths.stab__ogg);		
 	}
 
 	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
@@ -171,6 +191,10 @@ class PlayState extends FlxState
 				var e = new SignsText(x, y, (entityData.get("typeText")));
 				Reg.spritesGroup.add(e);
 				e.kill();
+			case "enemy":
+				var e = new LightSucker(x, y);
+				Reg.spritesGroup.add(e);
+				e.kill();
 		}
 	}
 
@@ -178,7 +202,7 @@ class PlayState extends FlxState
 	{
 		if (contaLightning > 30)
 		{
-			if (randLightning.bool(70))
+			if (randLightning.bool(70) && !noLightBool)
 			{
 				thunderSound.play();
 				camera.flash(FlxColor.WHITE, 1.5);
@@ -212,35 +236,46 @@ class PlayState extends FlxState
 	{
 		if (Reg.lightCountDown == 35)
 		{
+			noLightBool = true;
 			if (contaEnd >= 0)
 			{
-				if (contaTextEnd < 0)
+				if (countdownOneSec < 0)
 				{
-					textEnd.resetText(textEndCount + "..");
-					textEnd.setPosition(Reg.p1.x, Reg.p1.y - 20);
-					textEnd.start(0.2, false, true, null, endCountPlusPlus);
-					contaTextEnd = 1;
+					textEndCount.resetText(countdownNineSec + "..");
+					FlxG.camera.flash(FlxColor.RED, 1);
+					textEndCount.setPosition(Reg.p1.x, Reg.p1.y - 20);
+					textEndCount.start(0.2, false, true, null, endCountPlusPlus);
+					countdownOneSec = 1;
 				}
 				else
 				{
-					contaTextEnd -= FlxG.elapsed * 0.5;
+					countdownOneSec -= FlxG.elapsed * 0.5;
 				}
+				contaEnd -= FlxG.elapsed * 0.5;
 			}
 			else
 			{
-			FlxG.camera.fill(FlxColor.RED, true, 1.0);
+				countdownOneSec = 3;
+				FlxG.camera.fade(FlxColor.BLACK, 3, false, GameOverTrue);				
 			}
-			contaEnd -= FlxG.elapsed * 0.5;
 			}
 		else
 		{
 			contaEnd = 10;
-			textEndCount = 9;
+			countdownNineSec = 9;
+			noLightBool = false;
 		}
+	}
+	
+	function GameOverTrue():Void
+	{
+		FlxG.sound.pause();
+		FlxG.sound.play(AssetPaths.stab__ogg);
+		_gameOver = true;
 	}
 
 	function endCountPlusPlus()
 	{
-		textEndCount--;
+		countdownNineSec--;
 	}
 }
