@@ -84,9 +84,11 @@ class PlayState extends FlxState
 
 		background = new FlxSprite();
 		background.loadGraphic(AssetPaths.rainBackground__png, true, 960, 720);
-		background.animation.add("active", [0, 1], 8, true);
+		background.animation.add("active", [0, 1], 6, true);
 		background.animation.play("active");
-		background.scrollFactor.x = 0.2;
+		background.scrollFactor.set(0, 0);
+	
+		
 
 		add(tilemap);
 		add(Reg.tileGroup);
@@ -98,10 +100,11 @@ class PlayState extends FlxState
 		lightning.makeGraphic(FlxG.width, FlxG.height, 0xFFFFFFFF);
 		lightning.scrollFactor.set(0, 0);
 		lightning.alpha = 0;
-
+		
+		add(background);
 		add(Reg.darkness);
 		add(lightning);
-
+	
 		FlxG.sound.play(AssetPaths.rain2__wav, 0.2, true);
 		if (FlxG.sound.music == null)
 		{
@@ -119,6 +122,7 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+
 		respawnEntities();
 		super.update(elapsed);
 		FlxG.collide(tilemap, Reg.p1);
@@ -219,6 +223,7 @@ class PlayState extends FlxState
 					textEnd.resetText(textEndCount + "..");
 					textEnd.setPosition(Reg.p1.x, Reg.p1.y - 20);
 					textEnd.start(0.2, false, true, null, endCountPlusPlus);
+					FlxG.camera.flash(FlxColor.RED, 1);
 					contaTextEnd = 1;
 				}
 				else
@@ -228,7 +233,7 @@ class PlayState extends FlxState
 			}
 			else
 			{
-			FlxG.camera.fill(FlxColor.RED, true, 1.0);
+			FlxG.camera.fade(FlxColor.BLACK, 1);
 			}
 			contaEnd -= FlxG.elapsed * 0.5;
 			}
