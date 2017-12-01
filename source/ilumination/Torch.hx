@@ -22,15 +22,22 @@ class Torch extends FlxSprite
 		
 		animation.add("idle", [0, 1], 8, true);
 		animation.play("idle");
-		scale.set(1.5,1.5);
+		scale.set(1.5, 1.5);
+		offset.set(2, 1);
 		
 		light = new Light(x+width/2,y+height/2, Reg.darkness);
 		light.scale.set(7, 7);		
 		FlxG.state.add(light);
 		
 		if (dir == 1)
+		{
+		offset.set(3, 1);	
 		facing = FlxObject.RIGHT;
+		}
 		else if (dir == -1)
+		{
+			offset.set( -3, 1);
 		facing = FlxObject.LEFT;
+		}
 	}
 }

@@ -23,4 +23,6 @@ class Reg
 	static public var luminity:Float = 10;
 	static public var luminityDown:Float = 0.8;
 	static public var lightCountDown:Float = 40;
+	static public var _gameOver:Bool = false;
+	static public var upgradeContador:Int = 0;
 }

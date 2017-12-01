@@ -1,27 +1,22 @@
 package states;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.FlxState;
 import flixel.addons.editors.ogmo.FlxOgmoLoader;
+import flixel.effects.FlxFlicker;
+import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
-import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
-import ilumination.LightAreaUp;
 import ilumination.LightMenu;
 import ilumination.Torch;
 import openfl.display.BlendMode;
-import states.PlayState;
-import flixel.FlxG;
-import flixel.FlxState;
-import flixel.effects.FlxFlicker;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 
 /**
  * ...
  * @author G
  */
-class SplashScreen extends FlxState 
+class EndScreen extends FlxState 
 {
 	private var tilemap:FlxTilemap;
 	private var loader:FlxOgmoLoader;
@@ -56,31 +51,19 @@ class SplashScreen extends FlxState
 		add(background);
 		add(Reg.darkness);
 		
+		
 		FlxG.sound.play(AssetPaths.rain2__wav, 0.2, true);
 		if (FlxG.sound.music == null)
 		{
 			FlxG.sound.playMusic(AssetPaths.rain1__wav,1);
 		}
 		
-		textoTitle = new FlxText(FlxG.camera.width / 4 - 50, FlxG.camera.height / 2 + 40, 0, "In the Darkness", 64);
-		textoTitle.alpha = 0;
-		textoP2 = new FlxText(FlxG.camera.width / 2 - 80, FlxG.camera.height-58, 0, "Gaston Villalba", 48);
-		textoP3 = new FlxText(FlxG.camera.width / 4, FlxG.camera.width / 2 + 60, 0, "Press Z to Start", 48);
-		FlxFlicker.flicker(textoP3, 0, 1, true, true);
+		textoTitle = new FlxText(FlxG.camera.width / 4 - 50, FlxG.camera.height / 2 + 40, 0, "Upgrades: " +Reg.upgradeContador +"/5", 64);
+		textoP3 = new FlxText(FlxG.camera.width / 4-80, FlxG.camera.width / 2 + 60, 0, "Thank you for playing!", 48);
 		add(textoTitle);
 		
 		
 		textoTitle.color = 0xFF990000;
-		
-		FlxTween.tween(textoTitle, {alpha: 1}, 5, {ease:FlxEase.smoothStepIn, type:FlxTween.ONESHOT,onComplete:lightning});
-	}
-	
-	function lightning(t:FlxTween):Void
-	{
-		camera.flash(FlxColor.WHITE, 1.5);
-		FlxG.camera.shake(0.025, 1);
-		FlxG.sound.play(AssetPaths.thunder__wav);
-		add(textoP2);
 		add(textoP3);
 	}
 	
@@ -89,7 +72,7 @@ class SplashScreen extends FlxState
 		super.update(elapsed);		
 		if (FlxG.keys.justPressed.Z)
 		{
-			FlxG.switchState(new states.PlayState());
+			FlxG.switchState(new SplashScreen());
 		}
 	}
 	

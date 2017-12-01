@@ -27,7 +27,7 @@ class Upgrades extends pickups.Collectable
 	public function new(?X:Float=0, ?Y:Float=0,type:TypeUpgrade) 
 	{
 		super(X, Y);
-		textito = new FlxTypeText(x - 50, y - 30, 300, "nada", 16);		
+		textito = new FlxTypeText(x - 50, y - 30, 0, "nada", 16);		
 		textito.delay = 0.1; 
 		textito.color = 0xFFFFFFFF;		
 		textito.autoErase = true;
@@ -62,6 +62,7 @@ class Upgrades extends pickups.Collectable
 	override public function pickup(c:Collectable, p:Player):Void 
 	{
 		super.pickup(c, p);
+		Reg.upgradeContador++;
 			switch (tipo) 
 		{
 			case TypeUpgrade.JUMP:
@@ -78,6 +79,7 @@ class Upgrades extends pickups.Collectable
 				FlxG.sound.play(AssetPaths.pickupUpgrade__wav, 0.70);
 			case TypeUpgrade.LIGHT:
 				Reg.p1.lightPlusPlus();
+				Reg.lightCountDown = 100;
 				textito.resetText("Light last longer");
 				textito.start(0.02, false, true, null);
 				particles.destroy();

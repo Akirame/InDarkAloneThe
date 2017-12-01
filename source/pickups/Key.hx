@@ -19,7 +19,7 @@ class Key extends Collectable
 		super(X, Y);
 		loadGraphic(AssetPaths.key__png, false, 32, 32);
 		FlxTween.tween(this, {y:y + 10}, 1, {type:FlxTween.PINGPONG, ease:FlxEase.smoothStepInOut});
-		textito = new FlxTypeText(x - 20, y - 30, 250, "nada", 16);
+		textito = new FlxTypeText(x - 20, y - 30, 0, "nada", 16);
 		textito.delay = 0.1;
 		textito.color = 0xFFFFFFFF;
 		textito.autoErase = true;

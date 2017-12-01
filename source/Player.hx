@@ -20,8 +20,6 @@ import openfl.display.BlendMode;
 class Player extends FlxSprite
 {
 	public var fsm:FlxFSM<FlxSprite>;
-	private var trail:FlxTrail;
-	private var gfx:FlxEmitter;	
 	private var light:ilumination.Light;
 	private var key:Bool = false;
 	static public var wallDirection:Int = 0;
@@ -30,7 +28,21 @@ class Player extends FlxSprite
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
-		makeGraphic(32, 64, 0xFFFF0000);
+		#if web
+		pixelPerfectPosition = false;
+		#end
+		loadGraphic(AssetPaths.spriteSheet1__png, true, 80, 80);
+		
+		scale.set(0.5, 0.7);
+		updateHitbox();
+		scale.set(0.8, 0.8);
+		centerOffsets();
+		offset.y -= 5;
+		animation.add("idle", [0], 1, true);
+		animation.add("run", [1, 2, 3, 4, 5, 6, 7, 8], 12	, true);
+		animation.add("slide", [9], 1, true);
+		animation.add("jump", [10, 11, 12, 13, 14, 15, 16, 17], 14, false);		
+		animation.add("fall", [14, 15, 16, 17], 12, false);		
 		acceleration.y = Reg.gravity;		
 		light = new Light(x+width/2,y+height/5, Reg.darkness);
 		light.scale.set(Reg.luminity, Reg.luminity);
@@ -42,8 +54,8 @@ class Player extends FlxSprite
 		.add(Fall, Idle, Conditions.grounded)
 		.start(Idle);
 		
-		gfx = new FlxEmitter();		
-		trail = new FlxTrail(this, null, 10, 3, 0.4);
+		setFacingFlip(FlxObject.LEFT, true,false);
+		setFacingFlip(FlxObject.RIGHT, false,false);
 		
 	}
 	
@@ -108,7 +120,6 @@ class Player extends FlxSprite
 		key = true;
 		else
 		key = false;
-		trace(key);
 	}
 	public function getKey():Bool
 	{
@@ -153,15 +164,19 @@ class Idle extends FlxFSMState<FlxSprite>
 {	
 	override public function enter(owner:FlxSprite,fsm:FlxFSM<FlxSprite>):Void
 	{
-		owner.makeGraphic(32, 64, 0xFFFF0000);
+		owner.animation.play("idle");
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
+			owner.animation.play("run");
 			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;
+			owner.facing = FlxG.keys.pressed.LEFT ? FlxObject.LEFT:FlxObject.RIGHT;
 		}
+		else
+		owner.animation.play("idle");
 	}
 }
 
@@ -169,6 +184,7 @@ class Jump extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
+		owner.animation.play("jump");
 		owner.velocity.y -= 400;				
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
@@ -176,18 +192,24 @@ class Jump extends FlxFSMState<FlxSprite>
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;
+			owner.facing = FlxG.keys.pressed.LEFT ? FlxObject.LEFT:FlxObject.RIGHT;			
 		}
 	}
 }
 class Fall extends FlxFSMState<FlxSprite>
 {	
+	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
+	{
+		owner.animation.play("fall");
+	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{			
 		owner.velocity.x = 0;
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
 			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
+			owner.facing = FlxG.keys.pressed.LEFT ? FlxObject.LEFT:FlxObject.RIGHT;
 		}
 	}
 }
@@ -195,7 +217,7 @@ class Sliding extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
-		owner.makeGraphic(32, 64, 0xFF00FF00);
+		owner.animation.play("slide");
 	}
 	override public function update(elapsed:Float, owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
@@ -203,11 +225,13 @@ class Sliding extends FlxFSMState<FlxSprite>
 		{
 			owner.velocity.x -= 1;
 			Player.wallDirection = -1;
+			owner.facing = FlxObject.LEFT;
 		}
 		else if (owner.isTouching(FlxObject.RIGHT))
 		{			
 			owner.velocity.x += 1;
 			Player.wallDirection = 1;
+			owner.facing = FlxObject.RIGHT;
 		}
 		owner.velocity.y = 0;
 	}
@@ -220,16 +244,20 @@ class WallJump extends FlxFSMState<FlxSprite>
 {
 	override public function enter(owner:FlxSprite, fsm:FlxFSM<FlxSprite>):Void 
 	{
+		owner.animation.play("jump");
+		
 		owner.velocity.y -= 400;
 		if (Player.wallDirection == -1)
 		{
 			owner.velocity.x += 200;
 			Player.wallDirection = 0;
+			owner.facing = FlxObject.RIGHT;
 		}
 		else if (Player.wallDirection == 1)
 		{
 			owner.velocity.x -= 200;		
 			Player.wallDirection = 0;
+			owner.facing = FlxObject.LEFT;
 		}
 	}
 	
@@ -237,7 +265,8 @@ class WallJump extends FlxFSMState<FlxSprite>
 	{
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT)
 		{
-			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;			
+			owner.velocity.x = FlxG.keys.pressed.LEFT ? -Reg.velocityX:Reg.velocityX;		
+			owner.facing = FlxG.keys.pressed.LEFT ? FlxObject.LEFT:FlxObject.RIGHT;
 		}
 	}
 }

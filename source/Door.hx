@@ -28,6 +28,7 @@ class Door extends FlxSprite
 	{
 		if (Reg.p1.getKey())
 		{
+		FlxG.sound.play(AssetPaths.door__wav,2);
 		Reg.p1.doorKey();
 		destroy();
 		}

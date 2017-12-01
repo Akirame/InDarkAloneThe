@@ -8,8 +8,9 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
  * ...
  * @author G
  */
-class LightAreaUp extends FlxSprite 
+class LightMenu extends FlxSprite 
 {
+
 	private var light:Light;
 	
 	public function new(?X:Float = 0, ?Y:Float = 0)
@@ -21,10 +22,5 @@ class LightAreaUp extends FlxSprite
 		light = new Light(x+width/2,y+height/2, Reg.darkness);
 		light.scale.set(7, 7);		
 		FlxG.state.add(light);
-	}
-	override public function update(elapsed:Float):Void 
-	{
-		super.update(elapsed);		
-		FlxG.overlap(this, Reg.p1, Reg.p1.lightRenew);
 	}
 }

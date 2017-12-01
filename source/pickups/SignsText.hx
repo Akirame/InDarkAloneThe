@@ -12,6 +12,8 @@ enum TypeText
 	DOORTEXT;
 	LANTERNTEXT;
 	TUTORIALTEXT;
+	DROPTEXT;
+	START;
 }
 class SignsText extends Collectable
 {
@@ -28,14 +30,17 @@ class SignsText extends Collectable
 				tipo = TUTORIALTEXT;
 			case "LANTERN":
 				tipo = LANTERNTEXT;
+			case "DROP":
+				tipo = DROPTEXT;
+			case "START":
+				tipo = START;
 		}
-		textito = new FlxTypeText(x - 80, y - 70, 250, "nada", 16);
+		textito = new FlxTypeText(x - 70, y - 70,0, "nada", 16);
 		textito.delay = 0.1;
 		textito.color = 0xFFFFFFFF;
 		textito.autoErase = true;
 		textito.waitTime = 5.0;
 		FlxG.state.add(textito);
-		
 		makeGraphic(32, 32, 0x00000000);
 	}
 	override public function pickup(c:Collectable, p:Player):Void
@@ -44,13 +49,22 @@ class SignsText extends Collectable
 		switch (tipo)
 		{
 			case TypeText.DOORTEXT:
-				textito.resetText("You need a key to open this door");
-				textito.start(0.02, false, true, null);
+				textito.resetText("You need a key to open this door");			
+				textito.start(0.05, false, true, null);
 			case TypeText.LANTERNTEXT:
+				textito.fieldWidth = 250;
 				textito.resetText("Stay below the lantern to regain light");
 				textito.start(0.02, false, true, null);
 			case TypeText.TUTORIALTEXT:
-				textito.resetText("Every second you lose light, if reach 0 you die");
+				textito.resetText("Left & Right to move");
+				textito.start(0.02, false, true, null);
+			case TypeText.DROPTEXT:
+				textito.resetText("Press Down to drop off");
+				textito.start(0.02, false, true, null);
+			case TypeText.START:
+				textito.fieldWidth = 200;
+				textito.resetText("Find the exit before the light run out");
+				textito.italic = true;
 				textito.start(0.02, false, true, null);
 		}
 	}

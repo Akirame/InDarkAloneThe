@@ -4,6 +4,7 @@ import Tiles;
 import flixel.addons.text.FlxTypeText;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
+import ilumination.EndLight;
 import ilumination.Light;
 import ilumination.LightAreaUp;
 import ilumination.Torch;
@@ -45,16 +46,12 @@ class PlayState extends FlxState
 	private var textEndCount:FlxTypeText;
 	private var countdownOneSec:Float = 1;
 	private var countdownNineSec:Int = 9;
-	private var textGameOver:FlxText;
-	private var noLightBool:Bool = false;
-	var _gameOver:Bool = false;
+	private var noLightBool:Bool = false;	
 
 	override public function create():Void
 	{
 		super.create();
 
-		textGameOver = new FlxText(FlxG.width / 2, FlxG.height / 2, 200, "Game Over/n Press R to restart");
-		
 		randLightning = new FlxRandom();
 		thunderSound = FlxG.sound.load(AssetPaths.thunder__wav, 1);
 		Reg.darkness = new FlxSprite(0,0);
@@ -69,7 +66,13 @@ class PlayState extends FlxState
 		tilemap = loader.loadTilemap(AssetPaths.tiles__png, 32, 32, "tiles");
 		tilemap.setTileProperties(0, FlxObject.NONE);
 		tilemap.setTileProperties(1, FlxObject.ANY);
-		tilemap.setTileProperties(2, FlxObject.ANY, Falloff);
+		tilemap.setTileProperties(2, FlxObject.ANY);
+		tilemap.setTileProperties(3, FlxObject.ANY);
+		tilemap.setTileProperties(4, FlxObject.CEILING, Falloff);
+		tilemap.setTileProperties(5, FlxObject.ANY);
+		tilemap.setTileProperties(6, FlxObject.ANY);
+		tilemap.setTileProperties(7, FlxObject.ANY);
+		tilemap.setTileProperties(8, FlxObject.ANY);
 		loader.loadEntities(placeEntities, "entities");
 		FlxG.worldBounds.set(tilemap.width, tilemap.height);
 		FlxG.camera.follow(Reg.p1);
@@ -82,7 +85,7 @@ class PlayState extends FlxState
 		_barLight.numDivisions = 100;
 		_barLight.scrollFactor.set(0, 0);
 
-		textEndCount = new FlxTypeText(Reg.p1.x - 20, Reg.p1.y - 30, 250, "nada", 16);
+		textEndCount = new FlxTypeText(Reg.p1.x - 20, Reg.p1.y - 30, 0, "nada", 16);
 		textEndCount.delay = 0.1;
 		textEndCount.color = 0xFFFFFFFF;
 		textEndCount.autoErase = true;
@@ -129,11 +132,11 @@ class PlayState extends FlxState
 		super.update(elapsed);
 		FlxG.collide(tilemap, Reg.p1);
 	
-		if (_gameOver)
+		if (Reg._gameOver)
 		{
 			if (countdownOneSec < 0)
 			{
-				FlxG.switchState(new SplashScreen());			
+				FlxG.switchState(new EndScreen());			
 			}
 			else
 			countdownOneSec -= FlxG.elapsed * 0.5;			
@@ -193,6 +196,15 @@ class PlayState extends FlxState
 				e.kill();
 			case "enemy":
 				var e = new LightSucker(x, y);
+				Reg.spritesGroup.add(e);
+				e.kill();
+			case "endLight":
+				var e = new EndLight(x, y);
+				e.scale.set(2, 2);
+				Reg.spritesGroup.add(e);
+				e.kill();
+			case "endTrigger":
+				var e = new EndTrigger(x, y);
 				Reg.spritesGroup.add(e);
 				e.kill();
 		}
@@ -270,8 +282,10 @@ class PlayState extends FlxState
 	function GameOverTrue():Void
 	{
 		FlxG.sound.pause();
+		#if desktop
 		FlxG.sound.play(AssetPaths.stab__ogg);
-		_gameOver = true;
+		#end
+		Reg._gameOver = true;
 	}
 
 	function endCountPlusPlus()
